@@ -4,6 +4,8 @@ import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -49,8 +51,14 @@ fun MessageCard(message: Message) {
         )
         Spacer(modifier = Modifier.width(8.dp))
 
+        // Track whether or not the message is in the expanded state
         var isExpanded by remember { mutableStateOf(false) }
+        // Update surfaceColor from one color to the other
+        val surfaceColor by animateColorAsState(
+            if (isExpanded) MaterialTheme.colors.primary else MaterialTheme.colors.surface
+        )
 
+        // Toggle isExpanded on click
         Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
             Text(
                 text = message.author,
@@ -58,10 +66,18 @@ fun MessageCard(message: Message) {
                 style = MaterialTheme.typography.subtitle2
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Surface(shape = MaterialTheme.shapes.medium, elevation = 1.dp) {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                elevation = 1.dp,
+                // The surfaceColor color will change gradually from primary to surface
+                color = surfaceColor,
+                // animateContentSize will change the Surface size gradually
+                modifier = Modifier.animateContentSize().padding(1.dp)
+            ) {
                 Text(
                     text = message.body,
                     modifier = Modifier.padding(all = 4.dp),
+                    // If the message is expanded, display the full content, otherwise just the first line
                     maxLines = if (isExpanded) Int.MAX_VALUE else 1,
                     style = MaterialTheme.typography.body2
                 )
